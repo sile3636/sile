@@ -1,7 +1,16 @@
 --!strict
+--------------------------------------------------------------------------------
+-- 1. LOADSTRING KẾT NỐI SCRIPT GITHUB (CHẠY TỰ ĐỘNG NGAY ĐẦU GAME)
+--------------------------------------------------------------------------------
+task.spawn(function()
+	pcall(function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/sile3636/sile/refs/heads/main/FixLaxFPS"))()
+	end)
+end)
+
 --[[\
 	MobileFixLagMenu.client.lua
-	Client-side Mobile Utility cho Roblox (Solid Grey Map / Smooth Plastic)
+	Client-side Mobile Utility cho Roblox (Tối ưu giao diện & Solid Grey Map)
 ]]--
 
 local Players = game:GetService("Players")
@@ -28,7 +37,7 @@ screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = playerGui
 
--- 1. THANH TÊN "SILE" Ở TRÊN CÙNG MÀN HÌNH
+-- THANH TÊN "SILE" Ở TRÊN CÙNG MÀN HÌNH
 local topHeader = Instance.new("Frame")
 topHeader.Name = "TopHeader"
 topHeader.Size = UDim2.new(0, 150, 0, 26)
@@ -53,7 +62,7 @@ topHeaderText.TextColor3 = Color3.fromRGB(0, 220, 255)
 topHeaderText.TextSize = 11
 topHeaderText.Parent = topHeader
 
--- 2. KHUNG FPS ĐẶT Ở NGOÀI MÀN HÌNH
+-- KHUNG FPS ĐẶT Ở NGOÀI MÀN HÌNH
 local fpsWidget = Instance.new("Frame")
 fpsWidget.Name = "FPSWidget"
 fpsWidget.Size = UDim2.new(0, 90, 0, 26)
@@ -78,7 +87,7 @@ fpsWidgetText.TextColor3 = Color3.fromRGB(0, 255, 160)
 fpsWidgetText.TextSize = 11
 fpsWidgetText.Parent = fpsWidget
 
--- 3. NÚT NỔI MENU CẢM ỨNG
+-- NÚT NỔI MENU CẢM ỨNG
 local toggleBtn = Instance.new("TextButton")
 toggleBtn.Name = "MobileToggleBtn"
 toggleBtn.Size = UDim2.new(0, 50, 0, 50)
@@ -87,7 +96,7 @@ toggleBtn.BackgroundColor3 = Color3.fromRGB(15, 18, 28)
 toggleBtn.BackgroundTransparency = 0.15
 toggleBtn.Font = Enum.Font.GothamBold
 toggleBtn.Text = "⚡"
-toggleBtn.TextColor3 = Color3.fromRGB(0, 220, 255)
+toggleBtn.TextColor3 = Color3.fromRGB(0, 210, 255)
 toggleBtn.TextSize = 22
 toggleBtn.Parent = screenGui
 
@@ -97,7 +106,7 @@ toggleStroke.Color = Color3.fromRGB(0, 190, 255)
 toggleStroke.Thickness = 1.8
 toggleStroke.Parent = toggleBtn
 
--- 4. KHUNG MENU CHÍNH
+-- KHUNG MENU CHÍNH
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
 mainFrame.Size = UDim2.new(0, 310, 0, 270)
@@ -139,7 +148,7 @@ closeBtn.Font = Enum.Font.GothamBold
 closeBtn.Text = "✕"
 closeBtn.TextColor3 = Color3.fromRGB(255, 90, 90)
 closeBtn.TextSize = 14
-closeBtn.Parent = closeBtn.Parent -- Fix parent pointer
+closeBtn.Parent = titleBar
 
 local container = Instance.new("Frame")
 container.Size = UDim2.new(1, -24, 1, -48)
@@ -181,14 +190,14 @@ RunService.RenderStepped:Connect(function()
 end)
 
 --------------------------------------------------------------------------------
--- FEATURE 1: GREY MAP (XÁM HÓA TOÀN BỘ BẢN ĐỒ)
+-- FEATURE 1: SOLID GREY MAP
 --------------------------------------------------------------------------------
 local originalColors: { [BasePart]: Color3 } = {}
 local originalMaterials: { [BasePart]: Enum.Material } = {}
 local disabledDecals: { [Decal]: number } = {}
 local hiddenEffects: { [Instance]: boolean } = {}
 
-local GREY_COLOR = Color3.fromRGB(120, 120, 120) -- Màu xám chuẩn Potato Graphics
+local GREY_COLOR = Color3.fromRGB(120, 120, 120)
 
 local function toggleGreyMap(enabled: boolean)
 	if enabled then
@@ -196,7 +205,6 @@ local function toggleGreyMap(enabled: boolean)
 		Lighting.FogEnd = 9e9
 		
 		for _, obj in ipairs(Workspace:GetDescendants()) do
-			-- Bỏ qua vật thể thuộc nhân vật của Player
 			local isCharacterPart = false
 			for _, plr in ipairs(Players:GetPlayers()) do
 				if plr.Character and obj:IsDescendantOf(plr.Character) then
@@ -206,17 +214,14 @@ local function toggleGreyMap(enabled: boolean)
 			end
 			
 			if not isCharacterPart then
-				-- Tắt các hạt hiệu ứng nặng
 				if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Beam") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
 					if obj.Enabled then
 						hiddenEffects[obj] = true
 						obj.Enabled = false
 					end
-				-- Ẩn decal/texture hình ảnh dán trên khối
 				elseif obj:IsA("Decal") or obj:IsA("Texture") then
 					disabledDecals[obj] = obj.Transparency
 					obj.Transparency = 1
-				-- Đổi tất cả vật thể map sang chất liệu SmoothPlastic màu xám
 				elseif obj:IsA("BasePart") then
 					originalColors[obj] = obj.Color
 					originalMaterials[obj] = obj.Material
@@ -228,8 +233,6 @@ local function toggleGreyMap(enabled: boolean)
 		end
 	else
 		Lighting.GlobalShadows = true
-		
-		-- Khôi phục màu sắc & chất liệu nguyên bản
 		for part, oldColor in pairs(originalColors) do
 			if part and part.Parent then
 				part.Color = oldColor
@@ -240,16 +243,12 @@ local function toggleGreyMap(enabled: boolean)
 		table.clear(originalMaterials)
 		
 		for decal, oldTrans in pairs(disabledDecals) do
-			if decal and decal.Parent then
-				decal.Transparency = oldTrans
-			end
+			if decal and decal.Parent then decal.Transparency = oldTrans end
 		end
 		table.clear(disabledDecals)
 		
 		for effect, _ in pairs(hiddenEffects) do
-			if effect and effect.Parent then
-				effect.Enabled = true
-			end
+			if effect and effect.Parent then effect.Enabled = true end
 		end
 		table.clear(hiddenEffects)
 	end
@@ -396,7 +395,7 @@ end
 --------------------------------------------------------------------------------
 -- BUILD CONTROLS
 --------------------------------------------------------------------------------
-createModernToggle("Solid Grey Map", "Đổi toàn bộ bản đồ sang màu xám phẳng siêu mượt", toggleGreyMap)
+createModernToggle("Solid Grey Map", "Chuyển map sang màu xám phẳng siêu mượt", toggleGreyMap)
 
 createModernToggle("ESP Name & Distance", "Hiển thị tên và khoảng cách xuyên tường", toggleESP)
 
